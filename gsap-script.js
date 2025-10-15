@@ -1,7 +1,6 @@
 gsap.registerPlugin(Flip,MorphSVGPlugin,ScrollTrigger,SplitText)
 
 function init() {
-  //gsap.registerPlugin(ScrollTrigger);
 
   // Get element height
   const portfolioElement = document.querySelector(".c-home__right");
@@ -184,11 +183,195 @@ function init() {
   });
 }
 
-window.addEventListener("load", function(event) {
-	init();
+//
+function init() {
+  // HIDE HERO ON SCROLL
+  //let mm = gsap.matchMedia();
+  //mm.add("(min-width: 768px)", () => {
+    gsap.to(".c-homecl-hero", {
+      opacity: 0,
+      y: 0,
+      scrollTrigger: {
+        trigger: ".c-homecl-showcase",
+        start: 0,
+        end: "top +=180px",
+        pin: ".c-homecl-hero",
+        pinSpacing: false,
+        scrub: true,
+        //markers: true
+      },
+    })
+  //});
+
+
+  //SCROLL SPEED FEATURED PORTFOLIO
+  const featuredPortfolio = gsap.utils.toArray(".c-homecl-showcase > .c-homecl-showcase__item");
+
+  featuredPortfolio[0].setAttribute("data-speed", "1.3");
+  featuredPortfolio[1].setAttribute("data-speed", "2.3");
+  featuredPortfolio[2].setAttribute("data-speed", "3");
+  featuredPortfolio[3].setAttribute("data-speed", "1.75");
+
+  featuredPortfolio.forEach((item, index) => {
+    console.log(item);
+  });
+
+
+  // SECTION SERVICES
+  const services = gsap.utils.toArray(".c-homecl-services__content-wrapper > .c-homecl-services__content");
+  services.forEach((item, index) => {
+    console.log(item);
+  });
+  const servicesTitle = gsap.utils.toArray(".c-homecl-services__content > h2");
+  servicesTitle.forEach((item, index) => {
+    console.log(item);
+  });
+  const servicesImage = gsap.utils.toArray(".c-homecl-services__image-content > .c-homecl-services__image");
+  servicesImage.forEach((item, index) => {
+    console.log(item);
+  });
+
+  ScrollTrigger.create({
+    trigger: ".s-homecl-services",
+    start: "top top",
+    end: "bottom bottom",
+    pin: ".c-homecl-services__image-wrapper",
+    pinSpacing: false,
+    scrub: 1,
+    //markers: true,
+    snap: {
+      snapTo: services,
+      duration: 0.3,
+      delay: 0.1,
+      ease: "power1.inOut"
+    },
+  });
+
+  //mm.add("(min-width: 768px)", () => {
+    gsap.to(servicesImage[0], {
+      yPercent: -100,
+      duration: 1,
+      scrollTrigger: {
+        trigger: servicesTitle[0],
+        start: "top bottom",
+        //markers: true,
+      },
+    });
+
+    gsap.to(servicesImage[1], {
+      yPercent: -100,
+      duration: 1,
+      scrollTrigger: {
+        trigger: servicesTitle[1],
+        start: "top bottom",
+        //markers: true,
+      },
+    });
+
+    gsap.to(servicesImage[2], {
+      yPercent: -100,
+      duration: 1,
+      scrollTrigger: {
+        trigger: servicesTitle[2],
+        start: "top bottom",
+        //markers: true,
+      },
+    });
+  //});
+
+
+  //SECTION EXPECT
+  document.fonts.ready.then(() => {
+
+    const expectPoint = gsap.utils.toArray(".c-homecl-expect__point");
+    const expectPointSplit = [];
+    // Loop membuat SplitText untuk setiap metricsNumber
+    expectPoint.forEach((item, index) => {
+      let split = SplitText.create(item, {
+        type: "words, lines",
+        mask: "lines",
+        autoSplit: true,
+      });
+    // Simpan instance ke array dengan index yang sama
+    expectPointSplit[index] = split;
+    });
+
+    expectPointSplit.forEach((item, index) => {
+      console.log(item);
+    });
+
+    var expect2In = gsap.timeline();
+    expect2In.to(expectPointSplit[0].words, {
+      yPercent: -100,
+      autoAlpha: 0,
+      duration: 0.5,
+    })
+    .to(expectPointSplit[1].words, {
+      yPercent: -100,
+      autoAlpha: 1,
+      duration: 0.5,
+    });
+
+    ScrollTrigger.create({
+      trigger: ".c-homecl-expect",
+      start: "top-=100px top",
+      markers: true,
+      pin: ".c-homecl-expect",
+      animation: expect2In,
+    });
+
+
+  }); //document.fonts.ready.then(()
+
+
+} //function init()
+
+
+
+//PAGE: BRAND STORY
+const brandStoryCanvas = document.querySelector(".c-brand-story__image-canvas");
+const brandStoryC = document.querySelector(".c-brand-story__image");
+
+function brandStoryImageMove() {
+const brandStoryCanvasHeight = brandStoryCanvas.getBoundingClientRect().height;
+const viewportHeight = window.innerHeight;
+const targetTopPadding = 180;
+const targetBottomSpace = 24;
+return viewportHeight - brandStoryCanvasHeight - targetTopPadding - targetBottomSpace;
+};
+
+const brandStoryImage = gsap.timeline();
+brandStoryImage.to(brandStoryCanvas, {
+  y: brandStoryImageMove,
+  duration: 0.24,
+})
+.to(brandStoryCanvas, {
+  scale: 1.75,
+  transformOrigin: "left bottom",
+  duration: 1,
+  delay: 0.24,
+})
+.to(brandStoryCanvas, {
+  scale: 1.75,
+  duration: 2,
+  delay: 1.24,
+}, 0);
+
+ScrollTrigger.create({
+  trigger: ".c-brand-story__content",
+  start: 0,
+  end: "bottom bottom-=24px",
+  scrub: 2,
+  markers: true,
+  animation: brandStoryImage,
+  //pin: ".c-brand-story__images-wrapper",
+  //pin: ".c-brand-story__image-canvas",
+  pin: ".c-brand-story__image-wrapper",
+  //pinSpacing: false,
 })
 
 
-gsap.set(".c-home__content-wrapper.overview", { 
-  y: -50,
-});
+
+window.addEventListener("load", function(event) {
+	init();
+})

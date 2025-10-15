@@ -1,0 +1,266 @@
+
+<!-- [Attributes by Finsweet] CMS Combine -->
+<script async src="https://cdn.jsdelivr.net/npm/@finsweet/attributes-cmscombine@1/cmscombine.js"></script>
+<script src="https://unpkg.com/@barba/core"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@barba/core@2.9.7/dist/barba.umd/min.js"></script> -->
+
+<!-- Gsap gsap -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MorphSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/gh/prdvicky/10amspace-dev/gsap-script.js" async crossorigin="anonymous"></script> -->
+<script src="http://127.0.0.1:5500/gsap-script.js" async crossorigin="anonymous"></script>
+
+<script>
+/* ==========================
+   Preloader Function
+========================== */
+function runPreloader(container, loader, percentText, progressBar) {
+  return new Promise((resolve) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 5;
+      if (progress > 100) progress = 100;
+
+      if (percentText) percentText.textContent = Math.round(progress) + "%";
+      if (progressBar) progressBar.style.width = progress + "%";
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        if (loader) gsap.to(loader, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          onComplete: () => {
+            loader.style.display = "none";
+            resolve(); // selesai preloader
+          }
+        });
+        if (container) gsap.fromTo(container,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 1, ease: "power2.out" }
+        );
+      }
+    }, 50);
+  });
+}
+
+/* ==========================
+   Wait for CMS Combine & Finsweet Ready
+========================== */
+function waitForCMSCombine() {
+  return new Promise((resolve) => {
+    const timer = setInterval(() => {
+      const lists = document.querySelectorAll('[fs-cmscombine-element="list"]');
+      if (lists.length && window.fsAttributes && typeof window.fsAttributes.on === "function") {
+        clearInterval(timer);
+        resolve();
+      }
+    }, 300); // cek tiap 300ms
+  });
+}
+
+/* ==========================
+   Init CMS Combine
+========================== */
+function initCMSCombine() {
+  if (!window.fsAttributes) return;
+  // contoh: init cmscombine setiap page
+  window.fsAttributes.on('cmscombine', (listInstances) => {
+    console.log('✅ CMS Combine siap');
+  });
+}
+
+/* ==========================
+   Barba.js Init
+========================== */
+function initBarba() {
+  barba.init({
+    transitions: [{
+      name: 'fade',
+      async leave(data) {
+        await gsap.to(data.current.container, { opacity: 0, duration: 0.5 });
+      },
+      async enter(data) {
+        await gsap.from(data.next.container, { opacity: 0, duration: 0.5 });
+      }
+    }],
+    views: [{
+      namespace: 'default',
+      async afterEnter(data) {
+        // tunggu CMS Combine siap tiap pindah page
+        await waitForCMSCombine();
+        initCMSCombine();
+      }
+    }]
+  });
+}
+
+/* ==========================
+   First Load
+========================== */
+window.addEventListener("load", async () => {
+  const container = document.getElementById("smooth-wrapper");
+  const loader = document.getElementById("preloader");
+  const percentText = loader ? loader.querySelector(".percent") : null;
+  const progressBar = loader ? loader.querySelector(".progress-bar") : null;
+
+  // Jalankan preloader sampai 100%
+  await runPreloader(container, loader, percentText, progressBar);
+
+  // Tunggu CMS Combine siap pertama kali
+  await waitForCMSCombine();
+  initCMSCombine();
+
+  // Jalankan Barba SPA
+  initBarba();
+});
+
+</script>
+
+<script>
+  
+  //GSAP
+function init() {
+  // SCROLL SMOOTHER
+  const smoother = ScrollSmoother.create({
+    wrapper: '#smooth-wrapper',
+    content: '#smooth-content',
+    smooth: 1.5, // how long (in seconds) it takes to "catch up" to the native scroll position
+    effects: true, // looks for data-speed and data-lag attributes on elements
+    smoothTouch: 0.1, // much shorter smoothing time on touch devices (default is NO smoothing on touch devices)
+  });
+  console.log("After ScrollSmoother.create()");
+  console.log("ScrollSmoother instance:", smoother);
+
+  // Test apakah ScrollSmoother berhasil dibuat
+  if (smoother) {
+    console.log("✅ ScrollSmoother created successfully");
+    console.log("Wrapper element:", smoother.wrapper());
+    console.log("Content element:", smoother.content());
+  } else {
+    console.log("❌ ScrollSmoother failed to create");
+  }
+
+}
+
+window.addEventListener("preloaderDone", function(event) {
+	init();
+});
+
+
+
+  
+// GET ELEMENT HEIGHT
+//  document.documentElement.style.setProperty('--navbar-height', document.getElementById("navbar").offsetHeight + 'px');
+//  document.documentElement.style.setProperty('--separator-text', document.getElementById("c-separator-text").offsetHeight + 'px');
+  
+ 
+document.querySelectorAll('.internal-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault(); // cegah reload
+    const href = this.getAttribute('href');
+
+    // ganti URL tanpa reload
+    history.pushState(null, '', href);
+
+    // fetch konten dari href
+    fetch(href)
+      .then(res => res.text())
+      .then(html => {
+        document.querySelector('#container').innerHTML = html;
+      });
+  });
+});
+
+// handle back/forward button
+window.addEventListener('popstate', () => {
+  fetch(location.pathname)
+    .then(res => res.text())
+    .then(html => {
+      document.querySelector('#container').innerHTML = html;
+    });
+});
+
+
+  
+// jam dan libur
+  
+document.addEventListener("DOMContentLoaded", () => {
+  function parseCMSDate(str) {
+  // Coba langsung ke Date
+  let d = new Date(str);
+  if (!isNaN(d)) {
+    d.setHours(12, 0, 0, 0); // 🔑 normalisasi
+    return d;
+  }
+
+  // Kalau format Inggris: "September 26, 2025"
+  const parts = str.replace(",", "").split(" ");
+  if (parts.length === 3) {
+    const months = {
+      January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
+      July: 6, August: 7, September: 8, October: 9, November: 10, December: 11
+    };
+    const month = months[parts[0]];
+    const day = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    if (!isNaN(month) && !isNaN(day) && !isNaN(year)) {
+      d = new Date(year, month, day);
+      d.setHours(12, 0, 0, 0); // 🔑 normalisasi
+      return d;
+    }
+  }
+
+  return null; // fallback kalau gagal total
+}
+
+
+  function updateJam() {
+    const options = { hour: 'numeric', minute: '2-digit', hour12: true };
+    const nowJakarta = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    );
+    const jamJakarta = nowJakarta.toLocaleTimeString("en-US", options);
+
+    const nowLocal = new Date();
+    const diffHrs = Math.round((nowLocal - nowJakarta) / (1000 * 60 * 60));
+    const sign = diffHrs >= 0 ? "+" : "-";
+
+    const jamEl = document.getElementById("jam");
+    if (jamEl) {
+      jamEl.textContent = `${jamJakarta} JKT (${sign}${Math.abs(diffHrs)}H DIFF)`;
+    }
+
+    // Ambil libur dari CMS
+    const holidayEls = document.querySelectorAll(".holiday-date");
+    const holidayDates = Array.from(holidayEls)
+      .map(el => parseCMSDate(el.textContent.trim()))
+      .filter(Boolean); // buang null
+
+    const todayStr = nowJakarta.toISOString().split("T")[0];
+    const isWeekend = [0, 6].includes(nowJakarta.getDay());
+    const isHoliday = holidayDates.some(
+      d => d.toISOString().split("T")[0] === todayStr
+    );
+
+    const statusEl = document.getElementById("status");
+    if (statusEl) {
+      const hourWIB = nowJakarta.getHours();
+      if (!isWeekend && !isHoliday && hourWIB >= 8 && hourWIB < 17) {
+        statusEl.textContent = "WE'RE CURRENTLY ONLINE";
+      } else {
+        statusEl.textContent = "WE'RE CURRENTLY OFFLINE";
+      }
+    }
+  }
+
+  setInterval(updateJam, 1000);
+  updateJam();
+});
+
+
+
+</script>
