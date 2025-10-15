@@ -187,3 +187,8 @@ function init() {
 window.addEventListener("load", function(event) {
 	init();
 })
+
+
+gsap.set(".c-home__content-wrapper.overview", { 
+  y: -50,
+});
