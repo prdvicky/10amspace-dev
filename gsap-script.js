@@ -1,5 +1,7 @@
 gsap.registerPlugin(Flip,MorphSVGPlugin,ScrollTrigger,SplitText)
 
+
+
 function init() {
 
   // Get element height
@@ -326,6 +328,139 @@ function init() {
 
 } //function init()
 
+
+//PAGE: ABOUT
+// Move portfolio to Section-2
+gsap.set(".c-about-approach__media", { x: -500 });
+
+const portfolioMove = gsap.timeline();
+portfolioMove.to(".c-about-hero__image-wrapper", {
+  x: 500,
+  duration: 1,
+  delay: 0,
+  ease: "none"
+})
+.to(".c-about-approach__media", {
+  x: 0,
+  duration: 1,
+  delay: 0,
+  ease: "none"
+}, 0);
+
+// MOVE PORTFOLIO TO SECTION 2
+ScrollTrigger.create({
+  trigger: ".c-about-hero",
+  endTrigger: ".c-about-hero__image-wrapper",
+  start: "top top",
+  end: "bottom top",
+  scrub: 1,
+  animation: portfolioMove,
+  //markers: true,
+  //invalidateOnRefresh: true,
+});
+
+//======================================
+
+// FIXED APPROACH IMAGE
+// function getApproachPositionBottom() {
+//   const approachImage = document.querySelector(".c-about-approach__media");
+//   const approachImageHeight = approachImage.getBoundingClientRect().height;
+//   const viewportSpacingBottom = 24;
+//   return (window.innerHeight - viewportSpacingBottom);
+// };
+// ScrollTrigger.create({
+//   trigger: ".c-about-approach__media",
+//   start: "bottom bottom-=24px",
+//   end: "bottom bottom-=24px",
+//   endTrigger: ".c-about-approach__content",
+//   //pin: ".c-about-approach__media",
+//   //pinSpacing: false,
+//   scrub: 1,
+//   //markers: true,
+//   //invalidateOnRefresh: true,
+// });
+
+//======================================
+
+// FIXED TEAM CONTENT - show only on the device with bigger than mobile breakpoint
+let mm = gsap.matchMedia();
+mm.add("(min-width: 768px)", () => {
+  ScrollTrigger.create({
+    trigger: "#team-content",
+    start: "bottom bottom-=24px",
+    end: "bottom bottom-=24px",
+    endTrigger: "#team-images",
+    pin: "#team-content",
+    //pinSpacing: false,
+    scrub: 1,
+    markers: {
+      startColor:"fuchsia",
+      endColor:"blue",
+    },
+  });
+  
+  //======================================
+
+  // SCALE UP ANIMATION STORY TEASER
+  gsap.set(".c-about-brand__image", {
+    aspectRatio: "1/1",
+    width: "200px",
+    height: "200px"
+  });
+  const teaserScale = gsap.timeline();
+  teaserScale.to(".c-about-brand__image", {
+    aspectRatio: "auto",
+    width: "100%",
+    height: "100%",
+    duration: 1,
+    ease: "none"
+  }, 0);
+
+  //SCALE UP IMAGE
+  ScrollTrigger.create({
+    trigger: ".c-about-brand",
+    start: "top top",
+    end: "top+=150vh",
+    scrub: 1,
+    animation: teaserScale,
+    //invalidateOnRefresh: true,
+    //markers: true,
+  });
+
+  //PINNING IMAGE
+  ScrollTrigger.create({
+    trigger: ".c-about-brand",
+    start: "top top",
+    end: "bottom bottom",
+    pin: ".c-about-brand__wrapper",
+    scrub: 1,
+    //invalidateOnRefresh: true,
+    //markers: true,
+  });	
+
+  ScrollTrigger.refresh();
+
+  window.addEventListener('load', () => {
+    ScrollTrigger.refresh();
+  });
+});
+
+//DIVIDER TEAM SCALEDOWN
+gsap.to("#divider-team", {
+  opacity: 0,
+  width: 0,
+  scrollTrigger: {
+    trigger: "#divider-team",
+    start: "top top+=128px",
+    end: "top top",
+    endTrigger: ".c-about-team__member-wrapper",
+    pin: "#divider-team",
+    pinSpacing: false,
+    scrub: 1,
+    //markers: true,
+    //toggleActions: "play none none reverse"
+  }
+});
 
 
 //PAGE: BRAND STORY
